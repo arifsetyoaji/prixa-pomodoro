@@ -1,50 +1,65 @@
 <template>
   <v-card class="mt-8">
-    <v-tabs @change="changeTimerType" v-model="timerType" grow>
-      <v-tab v-for="tab in tabsTitles" :key="tab">
-        {{ tab }}
+    <v-tabs @change="changeCurrentTimer" v-model="currentTimer" grow>
+      <v-tab v-for="timer in timers" :key="timer.name">
+        {{ timer.name }}
       </v-tab>
-
-      <v-tabs-items v-model="timerType">
-        <v-tab-item>
-          <v-card
-            color="basil"
-            class="pa-5 d-flex flex-column align-center"
-            flat
-          >
-            <h1 class="time">{{ displayMinutes }}:{{ displaySeconds }}</h1>
-
-            <div class="button-group">
-              <v-btn @click="start" color="primary">
-                <v-icon left small>mdi-play-circle-outline</v-icon>
-                Start
-              </v-btn>
-              <v-btn @click="stop" color="error">
-                <v-icon left small>mdi-stop-circle-outline</v-icon>
-                Stop
-              </v-btn>
-              <v-btn @click="reset" :disabled="isRunning">
-                <v-icon left small>mdi-restart</v-icon>
-                Reset
-              </v-btn>
-            </div>
-          </v-card>
-        </v-tab-item>
-      </v-tabs-items>
     </v-tabs>
+    <v-card class="pa-5 d-flex flex-column align-center" flat>
+      <h1 class="time">{{ displayMinutes }}:{{ displaySeconds }}</h1>
+
+      <div class="button-group">
+        <v-btn @click="start" color="primary" :disabled="isRunning">
+          <v-icon left small>mdi-play-circle-outline</v-icon>
+          Start
+        </v-btn>
+        <v-btn @click="stop" color="error">
+          <v-icon left small>mdi-stop-circle-outline</v-icon>
+          Stop
+        </v-btn>
+        <v-btn
+          @click="reset(timers[currentTimer].minutes)"
+          :disabled="isRunning"
+        >
+          <v-icon left small>mdi-restart</v-icon>
+          Reset
+        </v-btn>
+      </div>
+    </v-card>
+
+    <SettingsModal :modal="modal" :closeModal="closeModal" :save="save" />
   </v-card>
 </template>
 
 
 <script>
+import SettingsModal from "./SettingsModal.vue";
+
 export default {
+  components: {
+    SettingsModal,
+  },
+  props: {
+    modal: {
+      type: Boolean,
+      required: true,
+    },
+    closeModal: {
+      type: Function,
+      required: true,
+    },
+  },
   data() {
     return {
       isRunning: false,
       timerInstance: null,
       totalSeconds: 25 * 60,
-      timerType: 0,
-      tabsTitles: ["Pomodoro", "Short Break", "Long Break"],
+      currentTimer: 0,
+      timers: [
+        { name: "Pomodoro", minutes: 25 },
+        { name: "Short Break", minutes: 5 },
+        { name: "Long Break", minutes: 10 },
+      ],
     };
   },
   computed: {
@@ -68,6 +83,10 @@ export default {
       this.stop;
       this.isRunning = true;
       this.timerInstance = setInterval(() => {
+        if (this.totalSeconds <= 0) {
+          this.stop();
+          return;
+        }
         this.totalSeconds -= 1;
       }, 1000);
     },
@@ -75,18 +94,23 @@ export default {
       this.isRunning = false;
       clearInterval(this.timerInstance);
     },
-    reset() {
+    reset(minutes) {
       this.stop();
-      this.totalSeconds = 25 * 60;
+      this.totalSeconds = minutes * 60;
     },
-    changeTimerType(num) {
-      console.log(num);
+    changeCurrentTimer(num) {
+      this.currentTimer = num;
+      this.reset(this.timers[num].minutes);
+    },
+    openModal() {
+      this.$emit(true);
+    },
+    save() {
+      this.closeModal();
     },
   },
 };
 </script>
-
-
 
 
 
