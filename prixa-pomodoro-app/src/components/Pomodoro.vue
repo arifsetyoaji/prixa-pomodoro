@@ -27,7 +27,12 @@
       </div>
     </v-card>
 
-    <SettingsModal :modal="modal" :closeModal="closeModal" :save="save" />
+    <SettingsModal
+      :modal="modal"
+      :closeModal="closeModal"
+      :timers="timers"
+      :save="save"
+    />
   </v-card>
 </template>
 
@@ -105,7 +110,10 @@ export default {
     openModal() {
       this.$emit(true);
     },
-    save() {
+    save(updatedTimers) {
+      this.timers = this.timers.map((timer, i) => {
+        return { ...timer, minutes: parseInt(updatedTimers[i]) };
+      });
       this.closeModal();
     },
   },

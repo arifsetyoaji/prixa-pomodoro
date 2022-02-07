@@ -2,10 +2,21 @@
   <v-dialog :modal="modal" persistent max-width="600px">
     <v-card>
       <v-card-titles><span class="headline"> Settings </span></v-card-titles>
+      <v-card-text>
+        <v-text-field
+          v-for="(timer, i) in updatedTimers"
+          :key="i"
+          label="Pomodoro"
+          v-model="updatedTimers[i]"
+          type="number"
+        >
+        </v-text-field>
+      </v-card-text>
+
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="blue darken-1" text @click="closeModal"> Close </v-btn>
-        <v-btn color="blue darken-1" text @click="save"> Save </v-btn>
+        <v-btn color="blue darken" @click="save(updatedTimers)"> Save </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -26,12 +37,24 @@ export default {
       type: Function,
       required: true,
     },
+    timers: {
+      type: Array,
+      required: true,
+    },
   },
 
   data() {
-    return {};
+    return {
+      updatedTimers: [],
+    };
   },
 
   methods: {},
+
+  mounted() {
+    this.updatedTimers = this.timers.map((timer) => {
+      return timer.minutes;
+    });
+  },
 };
 </script>
